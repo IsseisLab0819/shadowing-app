@@ -1,0 +1,22 @@
+// これはイメージだけ（実際にはAPIの仕様に合わせて書きます）
+app.post('/api/pronunciation', upload.single('audio'), async (req, res) => {
+  const text = req.body.text;
+  const audioBuffer = req.file.buffer;
+
+  // ここで外部の発音採点サービスを呼び出す
+  const result = await callPronunciationAPI(audioBuffer, text);
+
+  const totalScore = result.totalScore; // 0-100想定
+  const wordScores = result.wordScores; // [{word: "sample", score: 80}, …]
+
+  // スコアが一番低い単語を1つ選ぶ
+  let weakest = wordScores[0];
+  for (const w of wordScores) {
+    if (w.score < weakest.score) weakest = w;
+  }
+
+  res.json({
+    score: totalScore,
+    weakWord: weakest.word
+  });
+});
