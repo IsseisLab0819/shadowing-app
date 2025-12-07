@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shadowing Practice</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+    .section {
+      margin-top: 20px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .label {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 80px;
+    }
+    button {
+      padding: 8px 12px;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+    .small {
+      font-size: 0.85rem;
+      color: #555;
+    }
+    #score {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+    #weak-word {
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Shadowing Practice</h1>
+
+  <!-- 教科書本文 -->
+  <div class="section">
+    <div class="label">Textbook Passage</div>
+    <textarea id="passage">
+This is a sample passage from the textbook. You can replace this text with the real one.
+    </textarea>
+    <div class="small">※あとで実際の教科書本文に差し替え</div>
+  </div>
+
+  <!-- モデル音声の再生 -->
+  <div class="section">
+    <div class="label">Model Audio</div>
+    <!-- TODO: 自分で録音したモデル音声ファイルを用意して src に指定 -->
+    <audio id="modelAudio" controls>
+      <source src="model-sample.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    <div>
+      <label for="speed" class="label">Playback Speed: 
+        <span id="speedValue">1.0x</span>
+      </label>
+      <input type="range" id="speed" min="0.5" max="1.5" step="0.1" value="1.0">
+    </div>
+  </div>
+
+  <!-- 録音 -->
+  <div class="section">
+    <div class="label">Your Recording</div>
+    <button id="recordBtn">Start Recording</button>
+    <button id="stopBtn" disabled>Stop</button>
+    <div id="recordStatus" class="small"></div>
+    <div id="recordingsList"></div>
+  </div>
+
+  <!-- AI 発音チェック（ダミー） -->
+  <div class="section">
+    <div class="label">Pronunciation Check (Demo)</div>
+    <button id="checkBtn">Check Pronunciation</button>
+    <div id="score"></div>
+    <div id="weak-word"></div>
+    <div class="small">
+      ※今はダミーでスコアを出すようにしています。<br>
+      ※本格的にやるには、サーバー側でAI発音採点APIと連携します。
+    </div>
+  </div>
+
+  <script>
+    // --- モデル音声の速度変更 ---
+    const modelAudio = document.getElementById('modelAudio');
+    const speed = document.getElementById('speed');
+    const speedValue = document.getElementById('speedValue');
+
+    speed.addEventListener('input', () => {
+      const value = parseFloat(speed.value);
+      modelAudio.playbackRate = value;
+      speedValue.textContent = value.toFixed(1) + 'x';
+    });
+
+    // --- 録音処理 ---
+    let mediaRecorder;
+    let audioChunks = [];
+    const recordBtn = document.getElementById('recordBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const recordStatus = document.getElementById('recordStatus');
+    const recordingsList = document.getElementById('recordingsList');
+
+    recordBtn.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => {
+          audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
+          const url = URL.createObjectURL(blob);
+
+          const audio = document.createElement('audio');
+          audio.controls = true;
+          audio.src = url;
+
+          const wrapper = document.createElement('div');
+          wrapper.appendChild(audio);
+
+          recordingsList.innerHTML = '';
+          recordingsList.appendChild(wrapper);
+
+          // TODO: ここで blob をサーバーに送れば AI 採点に使える
+          window.lastRecordingBlob = blob;
+        };
+
+        mediaRecorder.start();
+        recordStatus.textContent = 'Recording...';
+        recordBtn.disabled = true;
+        stopBtn.disabled = false;
+      } catch (err) {
+        console.error(err);
+        recordStatus.textContent = 'Microphone access denied or error.';
+      }
+    });
+
+    stopBtn.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        recordStatus.textContent = 'Recording stopped.';
+        recordBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    });
+
+    // --- AI 発音チェック（ダミー実装） ---
+    const checkBtn = document.getElementById('checkBtn');
+    const scoreElem = document.getElementById('score');
+    const weakWordElem = document.getElementById('weak-word');
+    const passage = document.getElementById('passage');
+
+    checkBtn.addEventListener('click', async () => {
+      if (!window.lastRecordingBlob) {
+        scoreElem.textContent = 'Please record your voice first.';
+        weakWordElem.textContent = '';
+        return;
+      }
+
+      // 本来はここでサーバーに fetch して AI 採点
+      // 今はデモとしてランダムスコア＋ランダム単語を表示
+      const text = passage.value.trim();
+      const words = text.split(/\s+/).filter(w => w.length > 0);
+
+      const fakeScore = Math.floor(70 + Math.random() * 30); // 70-100
+      const weakWord = words.length > 0
+        ? words[Math.floor(Math.random() * words.length)].replace(/[.,!?]/g, '')
+        : '(no word)';
+
+      scoreElem.textContent = `Score: ${fakeScore}/100`;
+      weakWordElem.textContent = `You should practice this word: "${weakWord}"`;
+    });
+  </script>
+</body>
+</html>
