@@ -125,410 +125,343 @@
     }
     .history-item {
       display: flex;
-      justify-content: space-between;
+      justify-content:space-between;
       border-bottom: 1px dashed #e5e7eb;
       padding: 4px 0;
     }
-    .history-item span {
-      display: inline-block;
-    }
     .pill {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      background: #e5e7eb;
-      margin-left: 6px;
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:0.75rem;
+      background:#e5e7eb;
+      margin-left:6px;
     }
   </style>
 </head>
+
 <body>
-  <header>
-    <h1>教科書シャドーイング練習</h1>
-    <p>①レッスンを選ぶ → ②モデル音声を聞く → ③録音 → ④発音チェック</p>
-  </header>
+<header>
+  <h1>教科書シャドーイング練習</h1>
+  <p>①レッスン選択 → ②モデル音声 → ③録音 → ④発音チェック</p>
+</header>
 
-  <!-- レッスン選択 -->
-  <section class="card">
-    <h2>① レッスンを選ぶ</h2>
-    <label for="lessonSelect">レッスン</label>
-    <select id="lessonSelect"></select>
-    <p class="small">※音声ファイル（mp3）はリポジトリにアップしておく必要があります。</p>
-  </section>
+<!-- レッスン選択 -->
+<section class="card">
+  <h2>① レッスンを選ぶ</h2>
+  <label for="lessonSelect">レッスン</label>
+  <select id="lessonSelect"></select>
+</section>
 
-  <!-- 教科書本文＋翻訳 -->
-  <section class="card">
-    <h2>② 教科書本文</h2>
-    <div id="passageDisplay"></div>
-    <div class="row">
-      <button id="toggleTranslationBtn" class="secondary" type="button">
-        和訳を表示
-      </button>
-      <button id="copyTextBtn" class="secondary" type="button">
-        英文をコピー
-      </button>
-    </div>
-    <div id="translationBox"></div>
-    <p class="small">
-      ※単語をタップすると、Weblio（外部サイト）で意味を調べられます。
-    </p>
-  </section>
+<!-- 本文＋訳 -->
+<section class="card">
+  <h2>② 教科書本文</h2>
+  <div id="passageDisplay"></div>
+  <div class="row">
+    <button id="toggleTranslationBtn" class="secondary" type="button">和訳を表示</button>
+    <button id="copyTextBtn" class="secondary" type="button">英文をコピー</button>
+  </div>
+  <div id="translationBox"></div>
+</section>
 
-  <!-- モデル音声 -->
-  <section class="card">
-    <h2>③ モデル音声を聞く</h2>
-    <audio id="modelAudio" controls>
-      <!-- JS で src を差し替え -->
-      ご利用のブラウザでは audio タグがサポートされていません。
-    </audio>
-    <label for="speed" class="small">
-      再生スピード：<span id="speedValue">1.0x</span>
-    </label>
-    <input type="range" id="speed" min="0.5" max="1.5" step="0.1" value="1.0" />
-    <p class="small">※最初は 1.0x、慣れてきたら 1.2x や 1.5x にして練習。</p>
-  </section>
+<!-- 音声 -->
+<section class="card">
+  <h2>③ モデル音声</h2>
+  <audio id="modelAudio" controls>お使いのブラウザは audio をサポートしていません。</audio>
+  <label for="speed">再生スピード：<span id="speedValue">1.0x</span></label>
+  <input type="range" id="speed" min="0.5" max="1.5" step="0.1" value="1.0" />
+</section>
 
-  <!-- 録音 -->
-  <section class="card">
-    <h2>④ 自分の音声を録音</h2>
-    <div class="row">
-      <button id="recordBtn" type="button">● 録音スタート</button>
-      <button id="stopBtn" class="secondary" type="button" disabled>■ ストップ</button>
-    </div>
-    <p id="recordStatus" class="small"></p>
-    <div id="recordingsList"></div>
-    <p class="small">
-      ※録音は端末（ブラウザ）内でのみ使われます。サーバーには送信されません（発音AIを実装するまでは）。
-    </p>
-  </section>
+<!-- 録音 -->
+<section class="card">
+  <h2>④ 録音</h2>
+  <div class="row">
+    <button id="recordBtn" type="button">● 録音スタート</button>
+    <button id="stopBtn" type="button" class="secondary" disabled>■ ストップ</button>
+  </div>
+  <p id="recordStatus" class="small"></p>
+  <div id="recordingsList"></div>
+</section>
 
-  <!-- 発音チェック（今はダミー） -->
-  <section class="card">
-    <h2>⑤ 発音チェック</h2>
-    <button id="checkBtn" type="button">AIで発音をチェック（デモ）</button>
-    <div id="score"></div>
-    <div id="weak-word"></div>
-    <p class="small">
-      ※現在はランダムなスコアでデモ表示しています。<br />
-      ※将来、サーバー＋AI発音採点API（Gemini / ほか）と連携すれば本当のスコアになります。
-    </p>
-  </section>
+<!-- 発音チェック -->
+<section class="card">
+  <h2>⑤ 発音チェック（デモ）</h2>
+  <button id="checkBtn" type="button">AIでチェック（仮）</button>
+  <div id="score"></div>
+  <div id="weak-word"></div>
+</section>
 
-  <!-- 履歴 -->
-  <section class="card">
-    <h2>⑥ あなたの練習履歴</h2>
-    <div id="historyList" class="small"></div>
-    <p class="small">
-      ※この履歴はブラウザ（端末）に保存されます。<br />
-      ※別の端末・別のブラウザでは共有されません。
-    </p>
-  </section>
+<!-- 履歴 -->
+<section class="card">
+  <h2>⑥ 練習履歴</h2>
+  <div id="historyList" class="small"></div>
+</section>
 
-  <script>
-    // =========================
-    // レッスンデータ（ここを書き換えれば教科書本文＆音声を差し替え）
-    // =========================
-    const lessons = [
-      {
-        id: "lesson1",
-        title: "Lesson 1: Sample",
-        audioSrc: "lesson1.mp3", // ← リポジトリにアップした mp3 に合わせて変更
-        text: "This is a sample passage from the textbook. You can replace this text with the real one.",
-        translation: "これはサンプルの本文です。実際の教科書の文章に置き換えて使ってください。"
-      },
-      {
-        id: "lesson2",
-        title: "Lesson 2: Another Sample",
-        audioSrc: "lesson2.mp3",
-        text: "Shadowing is a powerful way to improve your pronunciation and rhythm in English.",
-        translation: "シャドーイングは、英語の発音やリズムを伸ばすとても強力な練習方法です。"
-      }
-      // 必要に応じてレッスンを追加
-    ];
+<script>
+// ==============================
+// レッスンデータ —— ★ここに追加済み★
+// ==============================
+const lessons = [
+  {
+    id: "lesson1",
+    title: "Lesson 1 Sample",
+    audioSrc: "lesson1.mp3",
+    text: "This is a sample passage for shadowing practice.",
+    translation: "これはシャドーイング練習用のサンプル本文です。"
+  },
+  {
+    id: "lesson2",
+    title: "Lesson 2 Sample",
+    audioSrc: "lesson2.mp3",
+    text: "Shadowing helps improve pronunciation, rhythm, and fluency.",
+    translation: "シャドーイングは発音・リズム・流暢さを向上させます。"
+  },
 
-    // =========================
-    // 要素の取得
-    =========================
-    const lessonSelect = document.getElementById("lessonSelect");
-    const passageDisplay = document.getElementById("passageDisplay");
-    const translationBox = document.getElementById("translationBox");
-    const toggleTranslationBtn = document.getElementById("toggleTranslationBtn");
-    const copyTextBtn = document.getElementById("copyTextBtn");
-    const modelAudio = document.getElementById("modelAudio");
-    const speed = document.getElementById("speed");
-    const speedValue = document.getElementById("speedValue");
+  /* ★★★ ここから追加レッスン ★★★ */
+  {
+    id: "R7_listen3",
+    title: "R7 1年 普通科 前期中間 リスニング(3)",
+    audioSrc: "R7_1_Listening3.mp3",
+    text: "（This is English Listening Test）",
+    translation: "（これは英語のリスニングテストです。）"
+  }
+  /* ★★★ 追加ここまで ★★★ */
+];
 
-    const recordBtn = document.getElementById("recordBtn");
-    const stopBtn = document.getElementById("stopBtn");
-    const recordStatus = document.getElementById("recordStatus");
-    const recordingsList = document.getElementById("recordingsList");
+// ==============================
+// 要素取得
+// ==============================
+const lessonSelect = document.getElementById("lessonSelect");
+const passageDisplay = document.getElementById("passageDisplay");
+const translationBox = document.getElementById("translationBox");
+const toggleTranslationBtn = document.getElementById("toggleTranslationBtn");
+const copyTextBtn = document.getElementById("copyTextBtn");
+const modelAudio = document.getElementById("modelAudio");
+const speed = document.getElementById("speed");
+const speedValue = document.getElementById("speedValue");
+const recordBtn = document.getElementById("recordBtn");
+const stopBtn = document.getElementById("stopBtn");
+const recordStatus = document.getElementById("recordStatus");
+const recordingsList = document.getElementById("recordingsList");
+const checkBtn = document.getElementById("checkBtn");
+const scoreElem = document.getElementById("score");
+const weakWordElem = document.getElementById("weak-word");
+const historyList = document.getElementById("historyList");
 
-    const checkBtn = document.getElementById("checkBtn");
-    const scoreElem = document.getElementById("score");
-    const weakWordElem = document.getElementById("weak-word");
+let currentLesson = null;
+let mediaRecorder;
+let audioChunks = [];
+window.lastRecordingBlob = null;
 
-    const historyList = document.getElementById("historyList");
+// ==============================
+// レッスン初期化
+// ==============================
+function initLessonSelect() {
+  lessons.forEach(l => {
+    const opt = document.createElement("option");
+    opt.value = l.id;
+    opt.textContent = l.title;
+    lessonSelect.appendChild(opt);
+  });
+  lessonSelect.value = lessons[0].id;
+  setLesson(lessons[0].id);
+}
 
-    let currentLesson = null;
-    let mediaRecorder;
-    let audioChunks = [];
-    window.lastRecordingBlob = null;
+lessonSelect.addEventListener("change", () => setLesson(lessonSelect.value));
 
-    // =========================
-    // レッスン選択の初期化
-    // =========================
-    function initLessonSelect() {
-      lessons.forEach(lesson => {
-        const option = document.createElement("option");
-        option.value = lesson.id;
-        option.textContent = lesson.title;
-        lessonSelect.appendChild(option);
-      });
-      if (lessons.length > 0) {
-        lessonSelect.value = lessons[0].id;
-        setLesson(lessons[0].id);
-      }
-    }
+function setLesson(id) {
+  currentLesson = lessons.find(l => l.id === id);
+  if (!currentLesson) return;
 
-    lessonSelect.addEventListener("change", () => {
-      setLesson(lessonSelect.value);
-    });
+  renderPassage();
+  translationBox.textContent = currentLesson.translation;
+  translationBox.style.display = "none";
+  toggleTranslationBtn.textContent = "和訳を表示";
 
-    function setLesson(lessonId) {
-      currentLesson = lessons.find(l => l.id === lessonId);
-      if (!currentLesson) return;
-      renderPassage(currentLesson.text);
-      translationBox.textContent = currentLesson.translation;
-      translationBox.style.display = "none";
-      toggleTranslationBtn.textContent = "和訳を表示";
+  modelAudio.src = currentLesson.audioSrc;
+  modelAudio.playbackRate = parseFloat(speed.value);
 
-      // 音声差し替え
-      modelAudio.src = currentLesson.audioSrc;
-      modelAudio.playbackRate = parseFloat(speed.value);
-    }
+  renderHistory();
+}
 
-    // =========================
-    // 本文レンダリング（文＋単語クリック対応）
-    // =========================
-    function renderPassage(text) {
-      passageDisplay.innerHTML = "";
-      const sentences = text.split(/(?<=[.!?])\s+/); // .!? のあとで区切る
-      sentences.forEach(sentence => {
-        if (!sentence.trim()) return;
-        const sentenceEl = document.createElement("span");
-        sentenceEl.className = "sentence";
-        const tokens = sentence.split(/(\s+)/); // 空白も保持
-        tokens.forEach(token => {
-          if (/\s+/.test(token)) {
-            sentenceEl.appendChild(document.createTextNode(token));
-          } else {
-            const clean = token.replace(/[.,!?;:"']/g, "");
-            const wordSpan = document.createElement("span");
-            wordSpan.className = "word";
-            wordSpan.textContent = token;
-            wordSpan.dataset.word = clean;
-            sentenceEl.appendChild(wordSpan);
-          }
-        });
-        passageDisplay.appendChild(sentenceEl);
-      });
-    }
+// ==============================
+// 本文レンダリング
+// ==============================
+function renderPassage() {
+  const text = currentLesson.text;
+  passageDisplay.innerHTML = "";
 
-    // 単語クリックで Weblio を開く
-    passageDisplay.addEventListener("click", (e) => {
-      if (e.target.classList.contains("word")) {
-        const w = e.target.dataset.word;
-        if (w) {
-          const url = "https://ejje.weblio.jp/content/" + encodeURIComponent(w);
-          window.open(url, "_blank");
-        }
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  sentences.forEach(s => {
+    const span = document.createElement("span");
+    span.className = "sentence";
+    s.split(/(\s+)/).forEach(tok => {
+      if (/^\s+$/.test(tok)) {
+        span.appendChild(document.createTextNode(tok));
+      } else {
+        const clean = tok.replace(/[.,!?;]/g, "");
+        const w = document.createElement("span");
+        w.className = "word";
+        w.dataset.word = clean;
+        w.textContent = tok;
+        span.appendChild(w);
       }
     });
+    passageDisplay.appendChild(span);
+  });
+}
 
-    // =========================
-    // 和訳切り替え
-    // =========================
-    toggleTranslationBtn.addEventListener("click", () => {
-      if (!currentLesson) return;
-      const isHidden = translationBox.style.display === "none";
-      translationBox.style.display = isHidden ? "block" : "none";
-      toggleTranslationBtn.textContent = isHidden ? "和訳を隠す" : "和訳を表示";
-    });
+// 単語タップ→Weblio
+passageDisplay.addEventListener("click", e => {
+  if (e.target.classList.contains("word")) {
+    const w = e.target.dataset.word;
+    window.open("https://ejje.weblio.jp/content/" + encodeURIComponent(w), "_blank");
+  }
+});
 
-    // 英文コピー
-    copyTextBtn.addEventListener("click", async () => {
-      if (!currentLesson) return;
-      try {
-        await navigator.clipboard.writeText(currentLesson.text);
-        copyTextBtn.textContent = "コピーしました";
-        setTimeout(() => copyTextBtn.textContent = "英文をコピー", 1500);
-      } catch (e) {
-        alert("コピーに失敗しました。");
-      }
-    });
+// ==============================
+// 和訳表示切替
+// ==============================
+toggleTranslationBtn.addEventListener("click", () => {
+  const isHidden = translationBox.style.display === "none";
+  translationBox.style.display = isHidden ? "block" : "none";
+  toggleTranslationBtn.textContent = isHidden ? "和訳を隠す" : "和訳を表示";
+});
 
-    // =========================
-    // モデル音声のスピード
-    // =========================
-    speed.addEventListener("input", () => {
-      const value = parseFloat(speed.value);
-      modelAudio.playbackRate = value;
-      speedValue.textContent = value.toFixed(1) + "x";
-    });
+// ==============================
+// 英文コピー
+// ==============================
+copyTextBtn.addEventListener("click", async () => {
+  await navigator.clipboard.writeText(currentLesson.text);
+  copyTextBtn.textContent = "コピーしました";
+  setTimeout(() => (copyTextBtn.textContent = "英文をコピー"), 1500);
+});
 
-    // =========================
-    // 録音処理
-    // =========================
-    recordBtn.addEventListener("click", async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-        mediaRecorder.ondataavailable = e => {
-          audioChunks.push(e.data);
-        };
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(audioChunks, { type: "audio/webm" });
-          const url = URL.createObjectURL(blob);
+// ==============================
+// 再生速度
+// ==============================
+speed.addEventListener("input", () => {
+  modelAudio.playbackRate = parseFloat(speed.value);
+  speedValue.textContent = speed.value + "x";
+});
 
-          window.lastRecordingBlob = blob;
+// ==============================
+// 録音
+// ==============================
+recordBtn.addEventListener("click", async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
 
-          const audio = document.createElement("audio");
-          audio.controls = true;
-          audio.src = url;
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
 
-          recordingsList.innerHTML = "";
-          recordingsList.appendChild(audio);
-        };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunks, { type: "audio/webm" });
+      const url = URL.createObjectURL(blob);
+      window.lastRecordingBlob = blob;
 
-        mediaRecorder.start();
-        recordStatus.textContent = "録音中… もう一度本文を読みながらシャドーイングしてみましょう。";
-        recordBtn.disabled = true;
-        stopBtn.disabled = false;
-      } catch (err) {
-        console.error(err);
-        recordStatus.textContent = "マイクへのアクセスが許可されませんでした。";
-      }
-    });
+      const a = document.createElement("audio");
+      a.controls = true;
+      a.src = url;
 
-    stopBtn.addEventListener("click", () => {
-      if (mediaRecorder && mediaRecorder.state === "recording") {
-        mediaRecorder.stop();
-        recordStatus.textContent = "録音を停止しました。再生して確認できます。";
-        recordBtn.disabled = false;
-        stopBtn.disabled = true;
-      }
-    });
+      recordingsList.innerHTML = "";
+      recordingsList.appendChild(a);
+    };
 
-    // =========================
-    // 発音チェック（今はダミー）
-    // =========================
-    checkBtn.addEventListener("click", async () => {
-      if (!window.lastRecordingBlob) {
-        scoreElem.textContent = "まず自分の音声を録音してください。";
-        weakWordElem.textContent = "";
-        return;
-      }
-      if (!currentLesson) return;
+    mediaRecorder.start();
+    recordStatus.textContent = "録音中…";
+    recordBtn.disabled = true;
+    stopBtn.disabled = false;
+  } catch (err) {
+    recordStatus.textContent = "マイクが使えません。";
+  }
+});
 
-      // ★ 将来の本格実装ポイント ★
-      // ここでサーバーに fetch で音声とテキストを送り、
-      // AI 発音採点 API の結果を受け取る形にできます。
-      //
-      // 例（イメージ）:
-      // const fd = new FormData();
-      // fd.append("audio", window.lastRecordingBlob, "recording.webm");
-      // fd.append("text", currentLesson.text);
-      // const res = await fetch("https://your-server.example.com/api/pronunciation", {
-      //   method: "POST",
-      //   body: fd
-      // });
-      // const data = await res.json();
-      // const { score, weakWord } = data;
+stopBtn.addEventListener("click", () => {
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    mediaRecorder.stop();
+    recordStatus.textContent = "録音を停止しました。";
+    recordBtn.disabled = false;
+    stopBtn.disabled = true;
+  }
+});
 
-      // ====== 今はデモとしてランダムなスコアを表示 ======
-      const words = currentLesson.text.split(/\s+/).filter(w => w.length > 0);
-      const fakeScore = Math.floor(60 + Math.random() * 40); // 60〜100
-      const weakWord = words.length > 0
-        ? words[Math.floor(Math.random() * words.length)].replace(/[.,!?;:"']/g, "")
-        : "(no word)";
+// ==============================
+// 発音チェック（ダミー）
+// ==============================
+checkBtn.addEventListener("click", () => {
+  if (!window.lastRecordingBlob) {
+    scoreElem.textContent = "まず録音してください。";
+    return;
+  }
 
-      const score = fakeScore;
+  const words = currentLesson.text.split(/\s+/).filter(w => w);
+  const score = Math.floor(60 + Math.random() * 40);
+  const weak = words[Math.floor(Math.random() * words.length)] || "";
 
-      scoreElem.textContent = `スコア：${score} / 100`;
-      weakWordElem.textContent = `もう一度練習すると良さそうな単語： "${weakWord}"`;
+  scoreElem.textContent = `スコア：${score}/100`;
+  weakWordElem.textContent = `弱点単語：${weak}`;
 
-      saveHistory(currentLesson.id, score, weakWord);
-      renderHistory();
-    });
+  saveHistory(currentLesson.id, score, weak);
+  renderHistory();
+});
 
-    // =========================
-    // 履歴（localStorage）
-    // =========================
-    const HISTORY_KEY = "shadowing_history_v1";
+// ==============================
+// 履歴
+// ==============================
+const HISTORY_KEY = "shadow_history_v1";
 
-    function loadHistory() {
-      try {
-        const raw = localStorage.getItem(HISTORY_KEY);
-        if (!raw) return {};
-        return JSON.parse(raw);
-      } catch (e) {
-        return {};
-      }
-    }
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
 
-    function saveHistory(lessonId, score, weakWord) {
-      const history = loadHistory();
-      if (!history[lessonId]) history[lessonId] = [];
-      history[lessonId].push({
-        timestamp: new Date().toISOString(),
-        score,
-        weakWord
-      });
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-    }
+function saveHistory(id, score, weakWord) {
+  const h = loadHistory();
+  if (!h[id]) h[id] = [];
+  h[id].push({
+    timestamp: new Date().toISOString(),
+    score,
+    weakWord
+  });
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+}
 
-    function renderHistory() {
-      const history = loadHistory();
-      historyList.innerHTML = "";
-      if (!currentLesson) return;
+function renderHistory() {
+  const h = loadHistory();
+  const list = h[currentLesson.id] || [];
 
-      const list = history[currentLesson.id] || [];
-      if (list.length === 0) {
-        historyList.textContent = "このレッスンの履歴はまだありません。";
-        return;
-      }
+  historyList.innerHTML = "";
+  if (list.length === 0) {
+    historyList.textContent = "まだ履歴はありません。";
+    return;
+  }
 
-      const recent = list.slice(-5).reverse(); // 最新5件
-      recent.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "history-item";
+  list.slice(-5).reverse().forEach(item => {
+    const div = document.createElement("div");
+    div.className = "history-item";
 
-        const date = new Date(item.timestamp);
-        const dateStr =
-          `${date.getMonth()+1}/${date.getDate()} ` +
-          `${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`;
+    const t = new Date(item.timestamp);
+    const ts = `${t.getMonth() + 1}/${t.getDate()} ${t.getHours()}:${String(t.getMinutes()).padStart(2, "0")}`;
 
-        const left = document.createElement("span");
-        left.textContent = dateStr;
+    div.innerHTML = `
+      <span>${ts}</span>
+      <span>スコア ${item.score}<span class="pill">${item.weakWord}</span></span>
+    `;
 
-        const right = document.createElement("span");
-        right.innerHTML = `スコア ${item.score} / 100 <span class="pill">${item.weakWord}</span>`;
+    historyList.appendChild(div);
+  });
+}
 
-        div.appendChild(left);
-        div.appendChild(right);
-        historyList.appendChild(div);
-      });
-    }
+// ==============================
+// 初期化
+// ==============================
+initLessonSelect();
+</script>
 
-    // レッスンが変わったら履歴も更新
-    lessonSelect.addEventListener("change", renderHistory);
-
-    // =========================
-    // 初期化
-    // =========================
-    initLessonSelect();
-    renderHistory();
-  </script>
 </body>
 </html>
