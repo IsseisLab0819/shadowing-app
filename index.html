@@ -1,467 +1,802 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>シャドーイング練習アプリ</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    :root {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color-scheme: light;
-    }
-    body {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 16px;
-      background: #f5f5f7;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    h1 {
-      font-size: 1.4rem;
-      margin: 4px 0;
-    }
-    header p {
-      font-size: 0.9rem;
-      color: #555;
-      margin: 0;
-    }
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-    }
-    .card h2 {
-      font-size: 1.0rem;
-      margin: 0 0 6px;
-    }
-    label {
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-    select, button, textarea, input[type="range"] {
-      width: 100%;
-      box-sizing: border-box;
-      margin-top: 4px;
-      margin-bottom: 4px;
-      padding: 8px;
-      font-size: 0.95rem;
-    }
-    button {
-      border-radius: 999px;
-      border: none;
-      background: #2563eb;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    button.secondary {
-      background: #e5e7eb;
-      color: #111827;
-    }
-    button:disabled {
-      opacity: 0.6;
-      cursor: default;
-    }
-    .small {
-      font-size: 0.8rem;
-      color: #666;
-    }
-    .row {
-      display: flex;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .row > * {
-      flex: 1;
-    }
-    #passageDisplay {
-      font-size: 0.95rem;
-      line-height: 1.6;
-      padding: 8px;
-      background: #f9fafb;
-      border-radius: 8px;
-      min-height: 80px;
-    }
-    .sentence {
-      display: block;
-      margin-bottom: 4px;
-    }
-    .word {
-      cursor: pointer;
-      border-radius: 4px;
-      padding: 1px 2px;
-    }
-    .word:hover {
-      background: #dbeafe;
-    }
-    #translationBox {
-      margin-top: 6px;
-      padding: 8px;
-      border-radius: 8px;
-      background: #fef3c7;
-      font-size: 0.9rem;
-      display: none;
-    }
-    audio {
-      width: 100%;
-      margin-top: 4px;
-    }
-    #score {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin-top: 4px;
-    }
-    #weak-word {
-      font-size: 0.9rem;
-      margin-top: 2px;
-    }
-    #historyList {
-      font-size: 0.85rem;
-    }
-    .history-item {
-      display: flex;
-      justify-content:space-between;
-      border-bottom: 1px dashed #e5e7eb;
-      padding: 4px 0;
-    }
-    .pill {
-      display:inline-block;
-      padding:2px 8px;
-      border-radius:999px;
-      font-size:0.75rem;
-      background:#e5e7eb;
-      margin-left:6px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI シャドーイング学習アプリ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .tab-container {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .audio-player {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-record {
+            background: #e74c3c;
+        }
+
+        .btn-record.recording {
+            background: #c0392b;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .btn-stop {
+            background: #95a5a6;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .feedback-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feedback-box.loading {
+            text-align: center;
+            color: #999;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .badge-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+        }
+
+        .badge {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .badge.earned {
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .badge.locked {
+            opacity: 0.3;
+        }
+
+        .badge:hover {
+            transform: scale(1.05);
+        }
+
+        .badge-icon {
+            font-size: 2.5em;
+            margin-bottom: 8px;
+        }
+
+        .badge-name {
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .contribution-graph {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .graph-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-top: 15px;
+        }
+
+        .graph-cell {
+            aspect-ratio: 1;
+            border-radius: 3px;
+            background: #eee;
+            transition: all 0.3s;
+        }
+
+        .graph-cell.level-1 { background: #c6e48b; }
+        .graph-cell.level-2 { background: #7bc96f; }
+        .graph-cell.level-3 { background: #239a3b; }
+        .graph-cell.level-4 { background: #196127; }
+
+        .username-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: border 0.3s;
+        }
+
+        .username-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .current-user {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .transcript-box {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            min-height: 60px;
+            border: 2px dashed #e0e0e0;
+        }
+
+        .transcript-box.active {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .tab {
+                font-size: 14px;
+                padding: 12px 8px;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+            
+            button {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-<header>
-  <h1>教科書シャドーイング練習</h1>
-  <p>①レッスン選択 → ②モデル音声 → ③録音 → ④発音チェック</p>
-</header>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 AI シャドーイング学習</h1>
+            <p>Claude AIがあなたの学習をサポート</p>
+        </div>
 
-<!-- レッスン選択 -->
-<section class="card">
-  <h2>① レッスンを選ぶ</h2>
-  <label for="lessonSelect">レッスン</label>
-  <select id="lessonSelect"></select>
-</section>
+        <div class="tab-container">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(0)">📚 学習</button>
+                <button class="tab" onclick="switchTab(1)">📊 進捗</button>
+                <button class="tab" onclick="switchTab(2)">🏆 実績</button>
+            </div>
 
-<!-- 本文＋訳 -->
-<section class="card">
-  <h2>② 教科書本文</h2>
-  <div id="passageDisplay"></div>
-  <div class="row">
-    <button id="toggleTranslationBtn" class="secondary" type="button">和訳を表示</button>
-    <button id="copyTextBtn" class="secondary" type="button">英文をコピー</button>
-  </div>
-  <div id="translationBox"></div>
-</section>
+            <!-- 学習タブ -->
+            <div class="tab-content active">
+                <div class="card">
+                    <h3>👤 あなたの名前を入力</h3>
+                    <input type="text" id="username" class="username-input" placeholder="名前を入力してください">
+                    <div id="currentUser" style="display:none;" class="current-user"></div>
+                </div>
 
-<!-- 音声 -->
-<section class="card">
-  <h2>③ モデル音声</h2>
-  <audio id="modelAudio" controls>お使いのブラウザは audio をサポートしていません。</audio>
-  <label for="speed">再生スピード：<span id="speedValue">1.0x</span></label>
-  <input type="range" id="speed" min="0.5" max="1.5" step="0.1" value="1.0" />
-</section>
+                <div class="card">
+                    <h3>🎧 音声を聞く</h3>
+                    <div class="audio-player">
+                        <audio id="audio" controls style="width:100%; margin-bottom:15px;">
+                            <source src="R7_1_Listening3.mp3" type="audio/mpeg">
+                        </audio>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="audioProgress"></div>
+                        </div>
+                    </div>
+                </div>
 
-<!-- 録音 -->
-<section class="card">
-  <h2>④ 録音</h2>
-  <div class="row">
-    <button id="recordBtn" type="button">● 録音スタート</button>
-    <button id="stopBtn" type="button" class="secondary" disabled>■ ストップ</button>
-  </div>
-  <p id="recordStatus" class="small"></p>
-  <div id="recordingsList"></div>
-</section>
+                <div class="card">
+                    <h3>🎤 シャドーイング録音</h3>
+                    <div class="controls">
+                        <button id="recordBtn" onclick="startRecording()">🎤 録音開始</button>
+                        <button id="stopBtn" onclick="stopRecording()" disabled class="btn-stop">⏹ 停止</button>
+                        <button id="playbackBtn" onclick="playRecording()" disabled>▶️ 再生</button>
+                    </div>
+                    <div class="transcript-box" id="transcriptBox">
+                        <p style="color:#999; text-align:center;">録音すると、あなたの発音がここに表示されます</p>
+                    </div>
+                </div>
 
-<!-- 発音チェック -->
-<section class="card">
-  <h2>⑤ 発音チェック（デモ）</h2>
-  <button id="checkBtn" type="button">AIでチェック（仮）</button>
-  <div id="score"></div>
-  <div id="weak-word"></div>
-</section>
+                <div class="card">
+                    <h3>🤖 AIフィードバック</h3>
+                    <button onclick="getAIFeedback()" id="feedbackBtn" style="width:100%; margin-bottom:15px;">Claude からフィードバックをもらう</button>
+                    <div class="feedback-box" id="feedbackBox">
+                        <p style="color:#999;">フィードバックボタンを押すと、AIがあなたの学習をサポートします</p>
+                    </div>
+                </div>
+            </div>
 
-<!-- 履歴 -->
-<section class="card">
-  <h2>⑥ 練習履歴</h2>
-  <div id="historyList" class="small"></div>
-</section>
+            <!-- 進捗タブ -->
+            <div class="tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalPractices">0</div>
+                        <div class="stat-label">練習回数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="streak">0</div>
+                        <div class="stat-label">連続日数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTime">0</div>
+                        <div class="stat-label">学習時間（分）</div>
+                    </div>
+                </div>
 
-<script>
-// ==============================
-// レッスンデータ —— ★ここに追加済み★
-// ==============================
-const lessons = [
-  {
-    id: "lesson1",
-    title: "Lesson 1 Sample",
-    audioSrc: "lesson1.mp3",
-    text: "This is a sample passage for shadowing practice.",
-    translation: "これはシャドーイング練習用のサンプル本文です。"
-  },
-  {
-    id: "lesson2",
-    title: "Lesson 2 Sample",
-    audioSrc: "lesson2.mp3",
-    text: "Shadowing helps improve pronunciation, rhythm, and fluency.",
-    translation: "シャドーイングは発音・リズム・流暢さを向上させます。"
-  },
+                <div class="contribution-graph">
+                    <h3>📅 学習カレンダー（過去28日間）</h3>
+                    <div class="graph-grid" id="contributionGraph"></div>
+                </div>
+            </div>
 
-  /* ★★★ ここから追加レッスン ★★★ */
-  {
-    id: "R7_listen3",
-    title: "R7 1年 普通科 前期中間 リスニング(3)",
-    audioSrc: "R7_1_Listening3.mp3",
-    text: "（This is English Listening Test）",
-    translation: "（これは英語のリスニングテストです。）"
-  }
-  /* ★★★ 追加ここまで ★★★ */
-];
+            <!-- 実績タブ -->
+            <div class="tab-content">
+                <h3 style="margin-bottom:20px;">🏆 獲得バッジ</h3>
+                <div class="badge-container" id="badgeContainer"></div>
+            </div>
+        </div>
+    </div>
 
-// ==============================
-// 要素取得
-// ==============================
-const lessonSelect = document.getElementById("lessonSelect");
-const passageDisplay = document.getElementById("passageDisplay");
-const translationBox = document.getElementById("translationBox");
-const toggleTranslationBtn = document.getElementById("toggleTranslationBtn");
-const copyTextBtn = document.getElementById("copyTextBtn");
-const modelAudio = document.getElementById("modelAudio");
-const speed = document.getElementById("speed");
-const speedValue = document.getElementById("speedValue");
-const recordBtn = document.getElementById("recordBtn");
-const stopBtn = document.getElementById("stopBtn");
-const recordStatus = document.getElementById("recordStatus");
-const recordingsList = document.getElementById("recordingsList");
-const checkBtn = document.getElementById("checkBtn");
-const scoreElem = document.getElementById("score");
-const weakWordElem = document.getElementById("weak-word");
-const historyList = document.getElementById("historyList");
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordedBlob;
+        let recognition;
+        let currentUser = '';
 
-let currentLesson = null;
-let mediaRecorder;
-let audioChunks = [];
-window.lastRecordingBlob = null;
+        const badges = [
+            { id: 'first', icon: '🌟', name: '初めての一歩', condition: 1 },
+            { id: 'consistent', icon: '🔥', name: '3日連続', condition: 3 },
+            { id: 'dedicated', icon: '💪', name: '7日連続', condition: 7 },
+            { id: 'expert', icon: '👑', name: '達人（30回）', condition: 30 },
+            { id: 'master', icon: '🏅', name: 'マスター（50回）', condition: 50 },
+            { id: 'legend', icon: '⭐', name: '伝説（100回）', condition: 100 }
+        ];
 
-// ==============================
-// レッスン初期化
-// ==============================
-function initLessonSelect() {
-  lessons.forEach(l => {
-    const opt = document.createElement("option");
-    opt.value = l.id;
-    opt.textContent = l.title;
-    lessonSelect.appendChild(opt);
-  });
-  lessonSelect.value = lessons[0].id;
-  setLesson(lessons[0].id);
-}
+        // 初期化
+        async function init() {
+            loadUserData();
+            updateStats();
+            updateContributionGraph();
+            updateBadges();
+            setupAudioProgress();
+            setupSpeechRecognition();
+            
+            document.getElementById('username').addEventListener('change', (e) => {
+                currentUser = e.target.value.trim();
+                if (currentUser) {
+                    document.getElementById('currentUser').textContent = `👤 ${currentUser}`;
+                    document.getElementById('currentUser').style.display = 'inline-block';
+                    document.getElementById('username').style.display = 'none';
+                    saveUserData();
+                }
+            });
+        }
 
-lessonSelect.addEventListener("change", () => setLesson(lessonSelect.value));
+        // 音声認識のセットアップ
+        function setupSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window) {
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
 
-function setLesson(id) {
-  currentLesson = lessons.find(l => l.id === id);
-  if (!currentLesson) return;
+                recognition.onresult = (event) => {
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    document.getElementById('transcriptBox').innerHTML = `<p><strong>あなたの発音:</strong> ${transcript}</p>`;
+                    document.getElementById('transcriptBox').classList.add('active');
+                };
+            }
+        }
 
-  renderPassage();
-  translationBox.textContent = currentLesson.translation;
-  translationBox.style.display = "none";
-  toggleTranslationBtn.textContent = "和訳を表示";
+        // 録音開始
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
 
-  modelAudio.src = currentLesson.audioSrc;
-  modelAudio.playbackRate = parseFloat(speed.value);
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
 
-  renderHistory();
-}
+                mediaRecorder.onstop = () => {
+                    recordedBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    document.getElementById('playbackBtn').disabled = false;
+                };
 
-// ==============================
-// 本文レンダリング
-// ==============================
-function renderPassage() {
-  const text = currentLesson.text;
-  passageDisplay.innerHTML = "";
+                mediaRecorder.start();
+                
+                if (recognition) {
+                    recognition.start();
+                }
 
-  const sentences = text.split(/(?<=[.!?])\s+/);
-  sentences.forEach(s => {
-    const span = document.createElement("span");
-    span.className = "sentence";
-    s.split(/(\s+)/).forEach(tok => {
-      if (/^\s+$/.test(tok)) {
-        span.appendChild(document.createTextNode(tok));
-      } else {
-        const clean = tok.replace(/[.,!?;]/g, "");
-        const w = document.createElement("span");
-        w.className = "word";
-        w.dataset.word = clean;
-        w.textContent = tok;
-        span.appendChild(w);
-      }
-    });
-    passageDisplay.appendChild(span);
-  });
-}
+                document.getElementById('recordBtn').disabled = true;
+                document.getElementById('recordBtn').classList.add('recording');
+                document.getElementById('stopBtn').disabled = false;
+            } catch (error) {
+                alert('マイクへのアクセスが必要です');
+            }
+        }
 
-// 単語タップ→Weblio
-passageDisplay.addEventListener("click", e => {
-  if (e.target.classList.contains("word")) {
-    const w = e.target.dataset.word;
-    window.open("https://ejje.weblio.jp/content/" + encodeURIComponent(w), "_blank");
-  }
-});
+        // 録音停止
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+            
+            if (recognition) {
+                recognition.stop();
+            }
 
-// ==============================
-// 和訳表示切替
-// ==============================
-toggleTranslationBtn.addEventListener("click", () => {
-  const isHidden = translationBox.style.display === "none";
-  translationBox.style.display = isHidden ? "block" : "none";
-  toggleTranslationBtn.textContent = isHidden ? "和訳を隠す" : "和訳を表示";
-});
+            document.getElementById('recordBtn').disabled = false;
+            document.getElementById('recordBtn').classList.remove('recording');
+            document.getElementById('stopBtn').disabled = true;
 
-// ==============================
-// 英文コピー
-// ==============================
-copyTextBtn.addEventListener("click", async () => {
-  await navigator.clipboard.writeText(currentLesson.text);
-  copyTextBtn.textContent = "コピーしました";
-  setTimeout(() => (copyTextBtn.textContent = "英文をコピー"), 1500);
-});
+            // 練習回数をカウント
+            incrementPracticeCount();
+        }
 
-// ==============================
-// 再生速度
-// ==============================
-speed.addEventListener("input", () => {
-  modelAudio.playbackRate = parseFloat(speed.value);
-  speedValue.textContent = speed.value + "x";
-});
+        // 録音再生
+        function playRecording() {
+            if (recordedBlob) {
+                const audio = new Audio(URL.createObjectURL(recordedBlob));
+                audio.play();
+            }
+        }
 
-// ==============================
-// 録音
-// ==============================
-recordBtn.addEventListener("click", async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
+        // AIフィードバック取得
+        async function getAIFeedback() {
+            const transcriptBox = document.getElementById('transcriptBox');
+            const transcript = transcriptBox.textContent;
+            
+            if (!transcript || transcript.includes('録音すると')) {
+                alert('まず録音を行ってください');
+                return;
+            }
 
-    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            const feedbackBox = document.getElementById('feedbackBox');
+            feedbackBox.innerHTML = '<p class="loading">🤖 Claude が分析中...</p>';
+            document.getElementById('feedbackBtn').disabled = true;
 
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(audioChunks, { type: "audio/webm" });
-      const url = URL.createObjectURL(blob);
-      window.lastRecordingBlob = blob;
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{
+                            role: 'user',
+                            content: `あなたは英語学習のコーチです。生徒がシャドーイング練習をしました。以下の発音テキストを分析して、励ましと具体的なアドバイスを日本語で提供してください。
 
-      const a = document.createElement("audio");
-      a.controls = true;
-      a.src = url;
+生徒の発音: ${transcript}
 
-      recordingsList.innerHTML = "";
-      recordingsList.appendChild(a);
-    };
+以下の形式で回答してください:
+1. 良かった点（具体的に褒める）
+2. 改善できる点（1-2点、優しく）
+3. 次回へのアドバイス
+4. 励ましの言葉
 
-    mediaRecorder.start();
-    recordStatus.textContent = "録音中…";
-    recordBtn.disabled = true;
-    stopBtn.disabled = false;
-  } catch (err) {
-    recordStatus.textContent = "マイクが使えません。";
-  }
-});
+温かく、前向きなトーンでお願いします。`
+                        }]
+                    })
+                });
 
-stopBtn.addEventListener("click", () => {
-  if (mediaRecorder && mediaRecorder.state === "recording") {
-    mediaRecorder.stop();
-    recordStatus.textContent = "録音を停止しました。";
-    recordBtn.disabled = false;
-    stopBtn.disabled = true;
-  }
-});
+                const data = await response.json();
+                const feedback = data.content[0].text;
+                
+                feedbackBox.innerHTML = `<div style="white-space: pre-line;">${feedback}</div>`;
+                
+                // フィードバック記録
+                saveFeedbackHistory(feedback);
+            } catch (error) {
+                feedbackBox.innerHTML = '<p style="color:#e74c3c;">エラーが発生しました。もう一度お試しください。</p>';
+            } finally {
+                document.getElementById('feedbackBtn').disabled = false;
+            }
+        }
 
-// ==============================
-// 発音チェック（ダミー）
-// ==============================
-checkBtn.addEventListener("click", () => {
-  if (!window.lastRecordingBlob) {
-    scoreElem.textContent = "まず録音してください。";
-    return;
-  }
+        // 音声再生の進捗バー
+        function setupAudioProgress() {
+            const audio = document.getElementById('audio');
+            const progress = document.getElementById('audioProgress');
+            
+            audio.addEventListener('timeupdate', () => {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progress.style.width = percent + '%';
+            });
+        }
 
-  const words = currentLesson.text.split(/\s+/).filter(w => w);
-  const score = Math.floor(60 + Math.random() * 40);
-  const weak = words[Math.floor(Math.random() * words.length)] || "";
+        // タブ切り替え
+        function switchTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach((tab, i) => {
+                if (i === index) {
+                    tab.classList.add('active');
+                    contents[i].classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                    contents[i].classList.remove('active');
+                }
+            });
 
-  scoreElem.textContent = `スコア：${score}/100`;
-  weakWordElem.textContent = `弱点単語：${weak}`;
+            if (index === 1) updateStats();
+            if (index === 2) updateBadges();
+        }
 
-  saveHistory(currentLesson.id, score, weak);
-  renderHistory();
-});
+        // 練習回数カウント
+        async function incrementPracticeCount() {
+            if (!currentUser) {
+                alert('名前を入力してください');
+                return;
+            }
 
-// ==============================
-// 履歴
-// ==============================
-const HISTORY_KEY = "shadow_history_v1";
+            try {
+                const key = `practice_${currentUser}`;
+                const result = await window.storage.get(key);
+                const data = result ? JSON.parse(result.value) : { count: 0, dates: {}, totalTime: 0 };
+                
+                data.count++;
+                const today = new Date().toISOString().split('T')[0];
+                data.dates[today] = (data.dates[today] || 0) + 1;
+                data.totalTime += 2; // 仮に1回2分
+                data.lastPractice = today;
+                
+                await window.storage.set(key, JSON.stringify(data));
+                updateStats();
+                updateContributionGraph();
+                updateBadges();
+            } catch (error) {
+                console.error('保存エラー:', error);
+            }
+        }
 
-function loadHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || {};
-  } catch {
-    return {};
-  }
-}
+        // 統計更新
+        async function updateStats() {
+            if (!currentUser) return;
 
-function saveHistory(id, score, weakWord) {
-  const h = loadHistory();
-  if (!h[id]) h[id] = [];
-  h[id].push({
-    timestamp: new Date().toISOString(),
-    score,
-    weakWord
-  });
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
-}
+            try {
+                const key = `practice_${currentUser}`;
+                const result = await window.storage.get(key);
+                
+                if (result) {
+                    const data = JSON.parse(result.value);
+                    document.getElementById('totalPractices').textContent = data.count;
+                    document.getElementById('totalTime').textContent = data.totalTime;
+                    document.getElementById('streak').textContent = calculateStreak(data.dates);
+                }
+            } catch (error) {
+                console.error('読み込みエラー:', error);
+            }
+        }
 
-function renderHistory() {
-  const h = loadHistory();
-  const list = h[currentLesson.id] || [];
+        // 連続日数計算
+        function calculateStreak(dates) {
+            const sortedDates = Object.keys(dates).sort().reverse();
+            let streak = 0;
+            let currentDate = new Date();
+            
+            for (let date of sortedDates) {
+                const practiceDate = new Date(date);
+                const diffDays = Math.floor((currentDate - practiceDate) / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === streak) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+            
+            return streak;
+        }
 
-  historyList.innerHTML = "";
-  if (list.length === 0) {
-    historyList.textContent = "まだ履歴はありません。";
-    return;
-  }
+        // コントリビューショングラフ更新
+        async function updateContributionGraph() {
+            if (!currentUser) return;
 
-  list.slice(-5).reverse().forEach(item => {
-    const div = document.createElement("div");
-    div.className = "history-item";
+            const graph = document.getElementById('contributionGraph');
+            graph.innerHTML = '';
+            
+            try {
+                const key = `practice_${currentUser}`;
+                const result = await window.storage.get(key);
+                const data = result ? JSON.parse(result.value) : { dates: {} };
+                
+                for (let i = 27; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    
+                    const cell = document.createElement('div');
+                    cell.className = 'graph-cell';
+                    
+                    const count = data.dates[dateStr] || 0;
+                    if (count > 0) {
+                        if (count >= 5) cell.classList.add('level-4');
+                        else if (count >= 3) cell.classList.add('level-3');
+                        else if (count >= 2) cell.classList.add('level-2');
+                        else cell.classList.add('level-1');
+                    }
+                    
+                    cell.title = `${dateStr}: ${count}回`;
+                    graph.appendChild(cell);
+                }
+            } catch (error) {
+                console.error('グラフ更新エラー:', error);
+            }
+        }
 
-    const t = new Date(item.timestamp);
-    const ts = `${t.getMonth() + 1}/${t.getDate()} ${t.getHours()}:${String(t.getMinutes()).padStart(2, "0")}`;
+        // バッジ更新
+        async function updateBadges() {
+            if (!currentUser) return;
 
-    div.innerHTML = `
-      <span>${ts}</span>
-      <span>スコア ${item.score}<span class="pill">${item.weakWord}</span></span>
-    `;
+            const container = document.getElementById('badgeContainer');
+            container.innerHTML = '';
+            
+            try {
+                const key = `practice_${currentUser}`;
+                const result = await window.storage.get(key);
+                const data = result ? JSON.parse(result.value) : { count: 0, dates: {} };
+                
+                const streak = calculateStreak(data.dates);
+                
+                badges.forEach(badge => {
+                    const div = document.createElement('div');
+                    div.className = 'badge';
+                    
+                    let earned = false;
+                    if (badge.id === 'first' || badge.id === 'expert' || badge.id === 'master' || badge.id === 'legend') {
+                        earned = data.count >= badge.condition;
+                    } else {
+                        earned = streak >= badge.condition;
+                    }
+                    
+                    if (earned) {
+                        div.classList.add('earned');
+                    } else {
+                        div.classList.add('locked');
+                    }
+                    
+                    div.innerHTML = `
+                        <div class="badge-icon">${badge.icon}</div>
+                        <div class="badge-name">${badge.name}</div>
+                    `;
+                    
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error('バッジ更新エラー:', error);
+            }
+        }
 
-    historyList.appendChild(div);
-  });
-}
+        // ユーザーデータ読み込み
+        function loadUserData() {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) {
+                currentUser = saved;
+                document.getElementById('username').value = currentUser;
+                document.getElementById('currentUser').textContent = `👤 ${currentUser}`;
+                document.getElementById('currentUser').style.display = 'inline-block';
+                document.getElementById('username').style.display = 'none';
+            }
+        }
 
-// ==============================
-// 初期化
-// ==============================
-initLessonSelect();
-</script>
+        // ユーザーデータ保存
+        function saveUserData() {
+            localStorage.setItem('currentUser', currentUser);
+        }
 
+        // フィードバック履歴保存
+        async function saveFeedbackHistory(feedback) {
+            if (!currentUser) return;
+            
+            try {
+                const key = `feedback_${currentUser}`;
+                const result = await window.storage.get(key);
+                const history = result ? JSON.parse(result.value) : [];
+                
+                history.unshift({
+                    date: new Date().toISOString(),
+                    feedback: feedback
+                });
+                
+                // 最新10件のみ保存
+                await window.storage.set(key, JSON.stringify(history.slice(0, 10)));
+            } catch (error) {
+                console.error('フィードバック保存エラー:', error);
+            }
+        }
+
+        // ページ読み込み時
+        window.addEventListener('load', init);
+    </script>
 </body>
 </html>
